@@ -1,3 +1,5 @@
+# 8x8 chess board with 4 queens starting at all four corners
+# queens take turns choosing a new position to move to (by clicking)
 import pygame
 import pandas as pd
 import numpy as np
@@ -52,7 +54,6 @@ class Queen(pygame.sprite.Sprite):
         self.j = j
         self.align = "left"
         self.color = color
-        self.size = size
         seguisy = pygame.font.SysFont("dejavusans", size)
         self.image = seguisy.render(queen_figure, True, pygame.Color(color))
         self.board = board
@@ -67,6 +68,8 @@ class Queen(pygame.sprite.Sprite):
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.color == queens[self.board.current_turn].color:
+                    
+                    # move to the point clicked
                     event_x, event_y = event.pos
                     event_i = (event_x - self.board.board_rect.left) // (self.board.board_rect.width // self.board.board_size)
                     event_j = self.board.board_size - 1 - (event_y - self.board.board_rect.top) // (self.board.board_rect.height // self.board.board_size)
@@ -99,6 +102,7 @@ class Queen(pygame.sprite.Sprite):
                             self.board.show_question()
                     else:
                         self.board.next_turn = self.board.current_turn
+                    
 
 class Board:
     def __init__(self, board_size, questions):
@@ -118,6 +122,7 @@ class Board:
         self.question_visible = False
 
     def reset_board(self):
+        # ts, w, h, c1, c2 = 50, *window.get_size(), (128, 128, 128), (64, 64, 64)
         for y in range(self.board_size):
             for x in range(self.board_size):
                 color = (192, 192, 164) if (x+y) % 2 == 0 else (96, 64, 32)
@@ -125,8 +130,7 @@ class Board:
                 
     def show_legal_moves(self, turn):
         self.reset_board()
-        
-        # Draw a circle on each valid square the queen can move to
+        # make all squares which are legal moves for the current queen green
         for i in range(self.board_size):
             for j in range(self.board_size):
                 if i == queens[turn].i or j == queens[turn].j or i-j == queens[turn].i-queens[turn].j or i+j == queens[turn].i+queens[turn].j:
@@ -244,10 +248,6 @@ while run:
 
     window.blit(board.board, (0, 0))
     group.draw(window)
-
-    # Display the turn information
-    display_turn_info(window, font, board.current_turn)
-
     pygame.display.flip()
 
 pygame.quit()
