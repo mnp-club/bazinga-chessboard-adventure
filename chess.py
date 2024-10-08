@@ -3,49 +3,13 @@
 import pygame
 import pandas as pd
 import numpy as np
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+import webbrowser
 queen_figure = '♛'
-
-# draw some text into an area of a surface
-# automatically wraps words
-# returns any text that didn't get blitted
-def drawText(surface, text, color, rect, font, aa=False, bkg=None):
-    rect = pygame.Rect(rect)
-    y = rect.top
-    lineSpacing = -2
-
-    # get the height of the font
-    fontHeight = font.size("Tg")[1]
-
-    while text:
-        i = 1
-
-        # determine if the row of text will be outside our area
-        if y + fontHeight > rect.bottom:
-            break
-
-        # determine maximum width of line
-        while font.size(text[:i])[0] < rect.width and i < len(text):
-            i += 1
-
-        # if we've wrapped the text, then adjust the wrap to the last word      
-        if i < len(text):
-            i = text.rfind(" ", 0, i) + 1
-
-        # render the line and blit it to the surface
-        if bkg:
-            image = font.render(text[:i], 1, color, bkg)
-            image.set_colorkey(bkg)
-        else:
-            image = font.render(text[:i], aa, color)
-        # x = rect.left
-        x = rect[0] + (rect[2] - image.get_width()) // 2
-        surface.blit(image, (x, y))
-        y += fontHeight + lineSpacing
-
-        # remove the text we just blitted
-        text = text[i:]
-
-    return text, y
+env = Environment(
+    loader=FileSystemLoader('.'),
+    autoescape=select_autoescape()
+)
 
 class Queen(pygame.sprite.Sprite):
     def __init__(self, i, j, color, size, board):
@@ -95,9 +59,6 @@ class Queen(pygame.sprite.Sprite):
                             self.set_pos()
                             # make all squares which are legal moves for the current queen green
                             self.board.show_legal_moves(self.board.current_turn)
-                            self.board.question_visible = False
-                            self.board.answer_visible = False
-                            self.board.show_question_and_answer()
                         
                     
 
@@ -111,11 +72,7 @@ class Board:
         self.window_size = window.get_size()
         self.start = (window.get_height() - self.size * board_size) // 2, (window.get_height() - self.size * board_size) // 2
         self.board_rect = pygame.Rect(*self.start, self.size*board_size, self.size*board_size)
-        # create a board_size x board_size array of questions
-        # questions is a pandas array, get the first board_size x board_size questions and reshape them into a board_size x board_size array
         self.questions = questions
-        self.question_visible = False
-        self.answer_visible = False
         self.move_chosen = False
 
     def reset_board(self):
@@ -159,10 +116,6 @@ class Board:
         for i in range(self.board_size+1):
             pygame.draw.line(self.board, (0, 0, 0), (self.start[0], self.start[1] + i*self.size), (self.start[0] + (self.board_size)*self.size, self.start[1] + i*self.size), 4)
             pygame.draw.line(self.board, (0, 0, 0), (self.start[0] + i*self.size, self.start[1]), (self.start[0] + i*self.size, self.start[1] + self.board_size*self.size), 4)
-
-    def show_question_and_answer(self):
-        # reset the right side of the screen, except for the button
-        pygame.draw.rect(self.board, (255, 255, 255), (self.start[0] + self.board_size*self.size + 2, self.start[1] + 30, self.window_size[0] - self.start[0] - self.board_size*self.size - 2, self.start[1] + 300 + self.board_size*self.size - 300 - 100 - (self.start[1] + 30)))
         # add question details (and name of current player) on right side of screen (outside of board)
         seguisy = pygame.font.SysFont("dejavusans", 112, bold=True)
         # center the text horizontally (use self.window_size) and add black border
@@ -170,74 +123,72 @@ class Board:
         text = "Team " + color
         x = self.start[0] + self.board_size*self.size + (self.window_size[0] - self.start[0] - self.board_size*self.size) // 2 - seguisy.render(text, True, pygame.Color(color)).get_width() // 2
         y = self.start[1] + 30
+        # whitewash the area before writing the text
+        pygame.draw.rect(self.board, (255, 255, 255), (x-20, y-10, seguisy.render(text, True, pygame.Color(color)).get_width()+40, seguisy.render(text, True, pygame.Color(color)).get_height()+20))
         text = seguisy.render(text, True, pygame.Color(color))
         self.board.blit(text, (x, y))
-        # add question details
-        seguisy = pygame.font.SysFont("dejavusans", 48, bold=True)
-        # center the text horizontally (use self.window_size) and add black border
+
+    def show_question(self):
+        # get the question details
         row = self.questions.iloc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]
-        text = row['Topic'] + " (" + row['Difficulty'] + ")"
-        if self.questions.iloc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]['Solved']:
-            text += " (Solved)"
-        x = self.start[0] + self.board_size*self.size + (self.window_size[0] - self.start[0] - self.board_size*self.size) // 2 - seguisy.render(text, True, pygame.Color('black')).get_width() // 2
-        y = self.start[1] + 200
-        text = seguisy.render(text, True, pygame.Color('black'))
-        self.board.blit(text, (x, y))
-        if self.question_visible:
-            # add question text
-            seguisy = pygame.font.SysFont("dejavusans", 48, bold=True)
-            # use drawText to wrap the text
-            text = row['Question']
-            text, y = drawText(self.board, text, pygame.Color('black'), (self.start[0] + self.board_size*self.size + 20, self.start[1] + 300, self.window_size[0] - self.start[0] - self.board_size*self.size - 40, self.board_size*self.size - 300 - 100), seguisy, aa=True, bkg=None)
-            # make another box which barely fits the text (use y)
-            pygame.draw.rect(self.board, (150, 0, 0), (self.start[0] + self.board_size*self.size + 10, self.start[1] + 290, self.window_size[0] - self.start[0] - self.board_size*self.size - 20, y - 290), 4)
-        if self.answer_visible:
-            # add answer text
-            seguisy = pygame.font.SysFont("dejavusans", 48, bold=True)
-            # use drawText to wrap the text
-            text = row['Answer']
-            text, new_y = drawText(self.board, text, pygame.Color('black'), (self.start[0] + self.board_size*self.size + 20, y + 50, self.window_size[0] - self.start[0] - self.board_size*self.size - 40, self.board_size*self.size - 300 - 100), seguisy, aa=True, bkg=None)
-            # make another box which barely fits the text (use y and new_y)
-            pygame.draw.rect(self.board, (0, 150, 0), (self.start[0] + self.board_size*self.size + 10, y + 40, self.window_size[0] - self.start[0] - self.board_size*self.size - 20, new_y - y - 20), 4)
+        topic = row['Topic']
+        difficulty = row['Difficulty']
+        question = row['Question']
+        answer = row['Answer']
+        # create the html page
+        # open the html page in a new browser window
+        template = env.get_template("question_template.html")
+        html = template.render(topic=topic, difficulty=difficulty, question=question, answer=answer)
+        with open("question.html", "w") as f:
+            f.write(html)
+        webbrowser.open("question.html")
+    
+    def show_answer(self):
+        # get the question details
+        row = self.questions.iloc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]
+        topic = row['Topic']
+        difficulty = row['Difficulty']
+        question = row['Question']
+        answer = row['Answer']
+        # create the html page
+        # open the html page in a new browser window
+        template = env.get_template("answer_template.html")
+        html = template.render(topic=topic, difficulty=difficulty, question=question, answer=answer)
+        with open("answer.html", "w") as f:
+            f.write(html)
+        webbrowser.open("answer.html")
+
 
 # button with border which displays "Show Question"
 class ShowQuestionButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 48)
+        seguisy = pygame.font.SysFont("dejavusans", 72)
         self.image = seguisy.render(text, True, pygame.Color('black'))
-        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 6 + 16, board.start[1] + board.board_size*board.size - 50))
+        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.3))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
 
     def update(self, event_list):
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.rect.collidepoint(event.pos):
-                    if not self.board.move_chosen and not self.board.question_visible:
-                        continue
-                    if self.board.question_visible and self.board.answer_visible:
-                        self.board.answer_visible = False
-                    self.board.question_visible = not self.board.question_visible
-                    self.board.show_question_and_answer()
+                if self.rect.collidepoint(event.pos) and self.board.move_chosen:
+                    self.board.show_question()
 
 class ShowAnswerButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 48)
+        seguisy = pygame.font.SysFont("dejavusans", 72)
         self.image = seguisy.render(text, True, pygame.Color('black'))
-        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2 + 9, board.start[1] + board.board_size*board.size - 50))
+        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.55))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
 
     def update(self, event_list):
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.rect.collidepoint(event.pos) and self.board.question_visible:
-                    self.board.answer_visible = not self.board.answer_visible
-                    self.board.show_question_and_answer()
-                if self.board.answer_visible and self.board.move_chosen:
-                    # that question is solved
+                if self.rect.collidepoint(event.pos) and self.board.move_chosen:
+                    self.board.show_answer()
                     self.board.move_chosen = False
                     self.board.questions.loc[queens[self.board.current_turn].i*self.board.board_size+queens[self.board.current_turn].j, "Solved"] = True
                     self.board.current_turn = (self.board.current_turn + 1) % num_queens
@@ -247,9 +198,9 @@ class SkipButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 48)
+        seguisy = pygame.font.SysFont("dejavusans", 72)
         self.image = seguisy.render(text, True, pygame.Color('black'))
-        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 6 * 5, board.start[1] + board.board_size*board.size - 50))
+        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.8))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
 
     def update(self, event_list):
@@ -293,7 +244,6 @@ group.add(ShowAnswerButton(board, "Show Answer"))
 group.add(SkipButton(board, "Skip Question"))
 
 board.show_legal_moves(board.current_turn)
-board.show_question_and_answer()
 
 run = True
 while run:
