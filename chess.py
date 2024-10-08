@@ -86,9 +86,11 @@ class Board:
         self.reset_board()
         # make all squares which are legal moves for the current queen green
         pygame.draw.rect(self.board, (136, 134, 72), (self.start[0]+ queens[turn].i*self.size, self.start[1] + (self.board_size-1-queens[turn].j)*self.size, self.size, self.size))
+        # calculate all squares with two queens
+        queen_pos_list = [(queen.i, queen.j) for queen in queens]
         for i in range(self.board_size):
             for j in range(self.board_size):
-                if (i == queens[turn].i or j == queens[turn].j or i-j == queens[turn].i-queens[turn].j or i+j == queens[turn].i+queens[turn].j) and not self.move_chosen and not (i == queens[turn].i and j == queens[turn].j):
+                if (i == queens[turn].i or j == queens[turn].j or i-j == queens[turn].i-queens[turn].j or i+j == queens[turn].i+queens[turn].j) and not self.move_chosen and not (i == queens[turn].i and j == queens[turn].j) and queen_pos_list.count((i, j)) < 2:
                         # delete the old rect and draw a new one
                         pygame.draw.rect(self.board, (50, 100, 50), (self.start[0]+ i*self.size, self.start[1] + (self.board_size-1-j)*self.size, self.size, self.size))
                 # add question text (topic, difficulty) inside square
@@ -124,7 +126,7 @@ class Board:
         x = self.start[0] + self.board_size*self.size + (self.window_size[0] - self.start[0] - self.board_size*self.size) // 2 - seguisy.render(text, True, pygame.Color(color)).get_width() // 2
         y = self.start[1] + 30
         # whitewash the area before writing the text
-        pygame.draw.rect(self.board, (255, 255, 255), (x-20, y-10, seguisy.render(text, True, pygame.Color(color)).get_width()+40, seguisy.render(text, True, pygame.Color(color)).get_height()+20))
+        pygame.draw.rect(self.board, (255, 255, 255), (x-120, y-110, seguisy.render(text, True, pygame.Color(color)).get_width()+240, seguisy.render(text, True, pygame.Color(color)).get_height()+220))
         text = seguisy.render(text, True, pygame.Color(color))
         self.board.blit(text, (x, y))
 
