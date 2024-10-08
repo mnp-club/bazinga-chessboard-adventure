@@ -14,7 +14,9 @@ env = Environment(
 class Queen(pygame.sprite.Sprite):
     def __init__(self, i, j, color, size, board):
         super().__init__()
+        self.last_i = i
         self.i = i
+        self.last_j = j
         self.j = j
         self.align = "left"
         self.color = color
@@ -53,6 +55,8 @@ class Queen(pygame.sprite.Sprite):
                                 self.align = "right"
                             if found_right:
                                 self.align = "left"
+                            self.last_i = self.i
+                            self.last_j = self.j
                             self.i = event_i
                             self.j = event_j
                             self.board.move_chosen = True
@@ -126,7 +130,7 @@ class Board:
         x = self.start[0] + self.board_size*self.size + (self.window_size[0] - self.start[0] - self.board_size*self.size) // 2 - seguisy.render(text, True, pygame.Color(color)).get_width() // 2
         y = self.start[1] + 30
         # whitewash the area before writing the text
-        pygame.draw.rect(self.board, (255, 255, 255), (x-120, y-110, seguisy.render(text, True, pygame.Color(color)).get_width()+240, seguisy.render(text, True, pygame.Color(color)).get_height()+220))
+        pygame.draw.rect(self.board, (255, 255, 255), (x-120, y-10, seguisy.render(text, True, pygame.Color(color)).get_width()+240, seguisy.render(text, True, pygame.Color(color)).get_height()+20))
         text = seguisy.render(text, True, pygame.Color(color))
         self.board.blit(text, (x, y))
 
@@ -168,7 +172,7 @@ class ShowQuestionButton(pygame.sprite.Sprite):
         self.board = board
         seguisy = pygame.font.SysFont("dejavusans", 72)
         self.image = seguisy.render(text, True, pygame.Color('black'))
-        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.3))
+        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.25))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
 
     def update(self, event_list):
@@ -183,7 +187,7 @@ class ShowAnswerButton(pygame.sprite.Sprite):
         self.board = board
         seguisy = pygame.font.SysFont("dejavusans", 72)
         self.image = seguisy.render(text, True, pygame.Color('black'))
-        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.55))
+        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.45))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
 
     def update(self, event_list):
@@ -202,7 +206,7 @@ class SkipButton(pygame.sprite.Sprite):
         self.board = board
         seguisy = pygame.font.SysFont("dejavusans", 72)
         self.image = seguisy.render(text, True, pygame.Color('black'))
-        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.8))
+        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.65))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
 
     def update(self, event_list):
@@ -211,6 +215,25 @@ class SkipButton(pygame.sprite.Sprite):
                 if self.rect.collidepoint(event.pos) and self.board.move_chosen:
                     self.board.move_chosen = False
                     self.board.current_turn = (self.board.current_turn + 1) % num_queens
+                    self.board.show_legal_moves(self.board.current_turn)
+
+class UndoButton(pygame.sprite.Sprite):
+    def __init__(self, board, text):
+        super().__init__()
+        self.board = board
+        seguisy = pygame.font.SysFont("dejavusans", 72)
+        self.image = seguisy.render(text, True, pygame.Color('black'))
+        self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.85))
+        pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
+
+    def update(self, event_list):
+        for event in event_list:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.rect.collidepoint(event.pos) and self.board.move_chosen:
+                    self.board.move_chosen = False
+                    queens[self.board.current_turn].i = queens[self.board.current_turn].last_i
+                    queens[self.board.current_turn].j = queens[self.board.current_turn].last_j
+                    queens[self.board.current_turn].set_pos()
                     self.board.show_legal_moves(self.board.current_turn)
 
 
@@ -244,6 +267,7 @@ group.add(queens)
 group.add(ShowQuestionButton(board, "Show Question"))
 group.add(ShowAnswerButton(board, "Show Answer"))
 group.add(SkipButton(board, "Skip Question"))
+group.add(UndoButton(board, "Undo Move"))
 
 board.show_legal_moves(board.current_turn)
 
