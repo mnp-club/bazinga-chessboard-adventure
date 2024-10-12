@@ -9,6 +9,8 @@ queen_figure = '♛'
 #     loader=FileSystemLoader('.'),
 #     autoescape=select_autoescape()
 # )
+# plt.rcParams['text.usetex'] = True
+# plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
 
 class Queen(pygame.sprite.Sprite):
     def __init__(self, i, j, color, size, board):
@@ -283,12 +285,12 @@ class UndoButton(pygame.sprite.Sprite):
 
 
 
-# load questions
-questions = pd.read_csv('questions.csv')
+# load questions, escape with \
+questions = pd.read_csv("questions.csv", escapechar = "\\")
 questions["Solved"] = False
 # pygame setup
 num_queens = 6
-board_size = 6
+board_size = 5
 # queen_size = 80
 queen_size = 120
 pygame.init()
