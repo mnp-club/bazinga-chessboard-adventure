@@ -9,8 +9,7 @@ queen_figure = '♛'
 #     loader=FileSystemLoader('.'),
 #     autoescape=select_autoescape()
 # )
-# plt.rcParams['text.usetex'] = True
-# plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
+plt.rcParams['text.usetex'] = True
 
 class Queen(pygame.sprite.Sprite):
     def __init__(self, i, j, color, size, board):
@@ -152,14 +151,19 @@ class Board:
         # webbrowser.open("question.html")
         if self.board_state != 1:
             # render the question to "question.png" using matplotlib
-            fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
-            ax.axis('off')
-            ax.text(0.5, 0.5, question, horizontalalignment='center', verticalalignment='center', fontsize=20, wrap=True)
-            fig.savefig("question.png")
+            # fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
+            # ax.axis('off')
+            # ax.text(0.5, 0.5, question, fontsize=20, wrap=True, ha='center', va='center', bbox=dict(facecolor='red', alpha=0.5))
+            # fig.savefig("question.png", bbox_inches='tight', dpi=300)
             # image should be scaled to fit exactly the chess board
-            image = pygame.image.load("question.png")
-            image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
-            self.board.blit(image, (self.start[0], self.start[1]))
+            # image = pygame.image.load("question.png")
+            # image is transparent, so a white background is added
+            image = pygame.image.load("questions/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
+            # scale image to board without changing aspect ratio
+            # image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
+            self.board.fill((255, 255, 255), (self.start[0], self.start[1], self.size*self.board_size, self.size*self.board_size))
+            # center image on board
+            self.board.blit(image, (self.start[0] + (self.size*self.board_size - image.get_width()) // 2, self.start[1] + (self.size*self.board_size - image.get_height()) // 2))
             # make the queens invisible
             for queen in queens:
                 queen.image = pygame.Surface((0, 0))
@@ -189,15 +193,18 @@ class Board:
         # webbrowser.open("answer.html")
         if self.board_state != 2:
             # render the answer to "answer.png" using matplotlib
-            self.questions.loc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j, "Solved"] = True
-            fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
-            ax.axis('off')
-            ax.text(0.5, 0.5, answer, horizontalalignment='center', verticalalignment='center', fontsize=20, wrap=True)
-            fig.savefig("answer.png")
+            # self.questions.loc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j, "Solved"] = True
+            # fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
+            # ax.axis('off')
+            # ax.text(0.5, 0.5, answer, fontsize=20, wrap=True, ha='center', va='center', bbox=dict(facecolor='green', alpha=0.5))
+            # fig.savefig("answer.png", bbox_inches='tight', dpi=300)
             # image should be scaled to fit exactly the chess board
-            image = pygame.image.load("answer.png")
-            image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
-            self.board.blit(image, (self.start[0], self.start[1]))
+            image = pygame.image.load("answers/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
+            # image is transparent, so a white background is added
+            # image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
+            self.board.fill((255, 255, 255), (self.start[0], self.start[1], self.size*self.board_size, self.size*self.board_size))
+            # center image on board
+            self.board.blit(image, (self.start[0] + (self.size*self.board_size - image.get_width()) // 2, self.start[1] + (self.size*self.board_size - image.get_height()) // 2))
             # make the queens invisible
             for queen in queens:
                 queen.image = pygame.Surface((0, 0))
