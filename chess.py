@@ -2,14 +2,13 @@
 # queens take turns choosing a new position to move to (by clicking)
 import pygame
 import pandas as pd
-import numpy as np
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-import webbrowser
+# from jinja2 import Environment, FileSystemLoader, select_autoescape
+import matplotlib.pyplot as plt
 queen_figure = '♛'
-env = Environment(
-    loader=FileSystemLoader('.'),
-    autoescape=select_autoescape()
-)
+# env = Environment(
+#     loader=FileSystemLoader('.'),
+#     autoescape=select_autoescape()
+# )
 
 class Queen(pygame.sprite.Sprite):
     def __init__(self, i, j, color, size, board):
@@ -78,6 +77,7 @@ class Board:
         self.board_rect = pygame.Rect(*self.start, self.size*board_size, self.size*board_size)
         self.questions = questions
         self.move_chosen = False
+        self.board_state = 0 # 0: board visible, 1: question visible, 2: answer visible
 
     def reset_board(self):
         # ts, w, h, c1, c2 = 50, *window.get_size(), (128, 128, 128), (64, 64, 64)
@@ -141,13 +141,35 @@ class Board:
         difficulty = row['Difficulty']
         question = row['Question']
         answer = row['Answer']
-        # create the html page
-        # open the html page in a new browser window
-        template = env.get_template("question_template.html")
-        html = template.render(topic=topic, difficulty=difficulty, question=question, answer=answer)
-        with open("question.html", "w") as f:
-            f.write(html)
-        webbrowser.open("question.html")
+        # # create the html page
+        # # open the html page in a new browser window
+        # template = env.get_template("question_template.html")
+        # html = template.render(topic=topic, difficulty=difficulty, question=question, answer=answer)
+        # with open("question.html", "w") as f:
+        #     f.write(html)
+        # webbrowser.open("question.html")
+        if self.board_state != 1:
+            # render the question to "question.png" using matplotlib
+            fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
+            ax.axis('off')
+            ax.text(0.5, 0.5, question, horizontalalignment='center', verticalalignment='center', fontsize=20, wrap=True)
+            fig.savefig("question.png")
+            # image should be scaled to fit exactly the chess board
+            image = pygame.image.load("question.png")
+            image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
+            self.board.blit(image, (self.start[0], self.start[1]))
+            # make the queens invisible
+            for queen in queens:
+                queen.image = pygame.Surface((0, 0))
+            self.board_state = 1
+        else:
+            self.reset_board()
+            self.show_legal_moves(self.current_turn)
+            # make the queens visible again
+            seguisy = pygame.font.SysFont("dejavusans", queen_size)
+            for queen in queens:
+                queen.image = seguisy.render(queen_figure, True, pygame.Color(queen.color))
+            self.board_state = 0
     
     def show_answer(self):
         # get the question details
@@ -156,13 +178,35 @@ class Board:
         difficulty = row['Difficulty']
         question = row['Question']
         answer = row['Answer']
-        # create the html page
-        # open the html page in a new browser window
-        template = env.get_template("answer_template.html")
-        html = template.render(topic=topic, difficulty=difficulty, question=question, answer=answer)
-        with open("answer.html", "w") as f:
-            f.write(html)
-        webbrowser.open("answer.html")
+        # # create the html page
+        # # open the html page in a new browser window
+        # template = env.get_template("answer_template.html")
+        # html = template.render(topic=topic, difficulty=difficulty, question=question, answer=answer)
+        # with open("answer.html", "w") as f:
+        #     f.write(html)
+        # webbrowser.open("answer.html")
+        if self.board_state != 2:
+            # render the answer to "answer.png" using matplotlib
+            fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
+            ax.axis('off')
+            ax.text(0.5, 0.5, answer, horizontalalignment='center', verticalalignment='center', fontsize=20, wrap=True)
+            fig.savefig("answer.png")
+            # image should be scaled to fit exactly the chess board
+            image = pygame.image.load("answer.png")
+            image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
+            self.board.blit(image, (self.start[0], self.start[1]))
+            # make the queens invisible
+            for queen in queens:
+                queen.image = pygame.Surface((0, 0))
+            self.board_state = 2
+        else:
+            self.reset_board()
+            self.show_legal_moves(self.current_turn)
+            # make the queens visible again
+            seguisy = pygame.font.SysFont("dejavusans", queen_size)
+            for queen in queens:
+                queen.image = seguisy.render(queen_figure, True, pygame.Color(queen.color))
+            self.board_state = 0
 
 
 # button with border which displays "Show Question"
@@ -195,12 +239,12 @@ class ShowAnswerButton(pygame.sprite.Sprite):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos) and self.board.move_chosen:
                     self.board.show_answer()
-                    self.board.move_chosen = False
-                    self.board.questions.loc[queens[self.board.current_turn].i*self.board.board_size+queens[self.board.current_turn].j, "Solved"] = True
-                    self.board.current_turn = (self.board.current_turn + 1) % num_queens
-                    self.board.show_legal_moves(self.board.current_turn)
+                    # self.board.move_chosen = False
+                    # self.board.questions.loc[queens[self.board.current_turn].i*self.board.board_size+queens[self.board.current_turn].j, "Solved"] = True
+                    # self.board.current_turn = (self.board.current_turn + 1) % num_queens
+                    # self.board.show_legal_moves(self.board.current_turn)
 
-class SkipButton(pygame.sprite.Sprite):
+class NextButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
@@ -212,7 +256,7 @@ class SkipButton(pygame.sprite.Sprite):
     def update(self, event_list):
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.rect.collidepoint(event.pos) and self.board.move_chosen:
+                if self.rect.collidepoint(event.pos) and self.board.move_chosen and self.board.board_state == 0:
                     self.board.move_chosen = False
                     self.board.current_turn = (self.board.current_turn + 1) % num_queens
                     self.board.show_legal_moves(self.board.current_turn)
@@ -229,7 +273,7 @@ class UndoButton(pygame.sprite.Sprite):
     def update(self, event_list):
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.rect.collidepoint(event.pos) and self.board.move_chosen:
+                if self.rect.collidepoint(event.pos) and self.board.move_chosen and self.board.board_state == 0:
                     self.board.move_chosen = False
                     queens[self.board.current_turn].i = queens[self.board.current_turn].last_i
                     queens[self.board.current_turn].j = queens[self.board.current_turn].last_j
@@ -266,7 +310,7 @@ group = pygame.sprite.Group()
 group.add(queens)
 group.add(ShowQuestionButton(board, "Show Question"))
 group.add(ShowAnswerButton(board, "Show Answer"))
-group.add(SkipButton(board, "Skip Question"))
+group.add(NextButton(board, "Next Question"))
 group.add(UndoButton(board, "Undo Move"))
 
 board.show_legal_moves(board.current_turn)
