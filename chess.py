@@ -9,6 +9,8 @@ queen_figure = '♛'
 #     loader=FileSystemLoader('.'),
 #     autoescape=select_autoescape()
 # )
+# allow tex
+plt.rcParams['text.usetex'] = True
 
 class Queen(pygame.sprite.Sprite):
     def __init__(self, i, j, color, size, board):
@@ -100,7 +102,7 @@ class Board:
                 # add question text (topic, difficulty) inside square
                 row = self.questions.iloc[i*self.board_size+j]
                 
-                seguisy = pygame.font.SysFont("dejavusans", 28, bold = True)
+                seguisy = pygame.font.SysFont("dejavusans", 21, bold = True)
                 board_id_text = seguisy.render(str(i*self.board_size+j), True, pygame.Color('black'))
                 if not self.questions.iloc[i*self.board_size+j]['Solved']:
                     topic_text = seguisy.render(row['Topic'], True, pygame.Color('black'))
@@ -123,7 +125,7 @@ class Board:
             pygame.draw.line(self.board, (0, 0, 0), (self.start[0], self.start[1] + i*self.size), (self.start[0] + (self.board_size)*self.size, self.start[1] + i*self.size), 4)
             pygame.draw.line(self.board, (0, 0, 0), (self.start[0] + i*self.size, self.start[1]), (self.start[0] + i*self.size, self.start[1] + self.board_size*self.size), 4)
         # add question details (and name of current player) on right side of screen (outside of board)
-        seguisy = pygame.font.SysFont("dejavusans", 112, bold=True)
+        seguisy = pygame.font.SysFont("dejavusans", 84, bold=True)
         # center the text horizontally (use self.window_size) and add black border
         color = queens[self.current_turn].color
         text = "Team " + color
@@ -187,6 +189,7 @@ class Board:
         # webbrowser.open("answer.html")
         if self.board_state != 2:
             # render the answer to "answer.png" using matplotlib
+            self.questions.loc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j, "Solved"] = True
             fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
             ax.axis('off')
             ax.text(0.5, 0.5, answer, horizontalalignment='center', verticalalignment='center', fontsize=20, wrap=True)
@@ -214,7 +217,7 @@ class ShowQuestionButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 72)
+        seguisy = pygame.font.SysFont("dejavusans", 54)
         self.image = seguisy.render(text, True, pygame.Color('black'))
         self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.25))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
@@ -229,7 +232,7 @@ class ShowAnswerButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 72)
+        seguisy = pygame.font.SysFont("dejavusans", 54)
         self.image = seguisy.render(text, True, pygame.Color('black'))
         self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.45))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
@@ -248,7 +251,7 @@ class NextButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 72)
+        seguisy = pygame.font.SysFont("dejavusans", 54)
         self.image = seguisy.render(text, True, pygame.Color('black'))
         self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.65))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
@@ -265,7 +268,7 @@ class UndoButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 72)
+        seguisy = pygame.font.SysFont("dejavusans", 54)
         self.image = seguisy.render(text, True, pygame.Color('black'))
         self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.85))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
@@ -290,7 +293,7 @@ questions["Solved"] = False
 num_queens = 6
 board_size = 6
 # queen_size = 80
-queen_size = 120
+queen_size = 100
 pygame.init()
 # window = pygame.display.set_mode((100*board_size,100*board_size))
 window = pygame.display.set_mode((2560,1440))
