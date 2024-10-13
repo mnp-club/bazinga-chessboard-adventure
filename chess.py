@@ -300,8 +300,8 @@ class UndoButton(pygame.sprite.Sprite):
 # load questions, escape with \
 questions = pd.read_csv("questions.csv", escapechar = "\\")
 questions["Solved"] = False
-# dim = (2560,1440)
-dim = (1920,1080)
+dim = (2560,1440)
+# dim = (1920,1080)
 scale = dim[1]/1440
 # pygame setup
 num_queens = 6
@@ -310,9 +310,9 @@ board_size = 5
 queen_size = int(120*scale)
 pygame.init()
 # window = pygame.display.set_mode((100*board_size,100*board_size))
-# window = pygame.display.set_mode(dim)
+window = pygame.display.set_mode(dim)
 # set full screen
-window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+# window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 # window = pygame.display.set_mode((0, 0))
 pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
