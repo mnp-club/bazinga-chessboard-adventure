@@ -125,14 +125,14 @@ class Board:
             pygame.draw.line(self.board, (0, 0, 0), (self.start[0], self.start[1] + i*self.size), (self.start[0] + (self.board_size)*self.size, self.start[1] + i*self.size), 4)
             pygame.draw.line(self.board, (0, 0, 0), (self.start[0] + i*self.size, self.start[1]), (self.start[0] + i*self.size, self.start[1] + self.board_size*self.size), 4)
         # add question details (and name of current player) on right side of screen (outside of board)
-        seguisy = pygame.font.SysFont("dejavusans", int(100*scale), bold=True)
+        seguisy = pygame.font.SysFont("dejavusans", int(80*scale), bold=True)
         # center the text horizontally (use self.window_size) and add black border
         color = queens[self.current_turn].color
         text = "Team " + queens[self.current_turn].name
         x = self.start[0] + self.board_size*self.size + (self.window_size[0] - self.start[0] - self.board_size*self.size) // 2 - seguisy.render(text, True, pygame.Color(color)).get_width() // 2
         y = self.start[1] + 30*scale
         # whitewash the area before writing the text
-        pygame.draw.rect(self.board, (255, 255, 255), (x-90*scale, y-10*scale, seguisy.render(text, True, pygame.Color(color)).get_width()+180*scale, seguisy.render(text, True, pygame.Color(color)).get_height()+20*scale))
+        pygame.draw.rect(self.board, (255, 255, 255), (x-60*scale, y-10*scale, seguisy.render(text, True, pygame.Color(color)).get_width()+120*scale, seguisy.render(text, True, pygame.Color(color)).get_height()+20*scale))
         text = seguisy.render(text, True, pygame.Color(color))
         self.board.blit(text, (x, y))
 
@@ -316,9 +316,9 @@ board_size = 5
 queen_size = int(120*scale)
 pygame.init()
 # window = pygame.display.set_mode((100*board_size,100*board_size))
-# window = pygame.display.set_mode(dim)
+window = pygame.display.set_mode(dim)
 # set full screen
-window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+# window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 # window = pygame.display.set_mode((0, 0))
 pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
