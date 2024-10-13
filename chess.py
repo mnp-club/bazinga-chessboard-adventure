@@ -316,9 +316,9 @@ board_size = 5
 queen_size = int(120*scale)
 pygame.init()
 # window = pygame.display.set_mode((100*board_size,100*board_size))
-# window = pygame.display.set_mode(dim)
+window = pygame.display.set_mode(dim)
 # set full screen
-window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+# window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 # window = pygame.display.set_mode((0, 0))
 pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
