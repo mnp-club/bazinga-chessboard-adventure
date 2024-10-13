@@ -159,6 +159,8 @@ class Board:
             # image = pygame.image.load("question.png")
             # image is transparent, so a white background is added
             image = pygame.image.load("questions/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
+            # scale image to 75% of its current size
+            image = pygame.transform.scale(image, (int(image.get_width()*0.75), int(image.get_height()*0.75)))
             # scale image to board without changing aspect ratio
             # image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
             self.board.fill((255, 255, 255), (self.start[0], self.start[1], self.size*self.board_size, self.size*self.board_size))
@@ -193,13 +195,15 @@ class Board:
         # webbrowser.open("answer.html")
         if self.board_state != 2:
             # render the answer to "answer.png" using matplotlib
-            # self.questions.loc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j, "Solved"] = True
+            self.questions.loc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j, "Solved"] = True
             # fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
             # ax.axis('off')
             # ax.text(0.5, 0.5, answer, fontsize=20, wrap=True, ha='center', va='center', bbox=dict(facecolor='green', alpha=0.5))
             # fig.savefig("answer.png", bbox_inches='tight', dpi=300)
             # image should be scaled to fit exactly the chess board
             image = pygame.image.load("answers/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
+            # scale image to 75% of its current size
+            image = pygame.transform.scale(image, (int(image.get_width()*0.75), int(image.get_height()*0.75)))
             # image is transparent, so a white background is added
             # image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
             self.board.fill((255, 255, 255), (self.start[0], self.start[1], self.size*self.board_size, self.size*self.board_size))
