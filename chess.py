@@ -324,12 +324,18 @@ pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
 
 board = Board(board_size,questions)
-queens = [Queen(1, 0, "red", queen_size, board, "Pythagor-gyatt"),
-          Queen(board_size-2, 0, "green", queen_size, board, "Einstein's Rizz"),
-          Queen(1, board_size-1, "blue", queen_size, board, "Euler No Cap"),
-          Queen(board_size-2, board_size-1, "gold", queen_size, board, "Fanum Fibonacci"),
-          Queen(0, 2, "purple", queen_size, board, "Gauss the Goat"),
-          Queen(board_size-1, board_size-3, "orange", queen_size, board, "No Euclid, All Drip")]
+# queens = [Queen(1, 0, "red", queen_size, board, "Pythagor-gyatt"),
+#           Queen(board_size-2, 0, "green", queen_size, board, "Einstein's Rizz"),
+#           Queen(1, board_size-1, "blue", queen_size, board, "Euler No Cap"),
+#           Queen(board_size-2, board_size-1, "gold", queen_size, board, "Fanum Fibonacci"),
+#           Queen(0, 2, "purple", queen_size, board, "Gauss the Goat"),
+#           Queen(board_size-1, board_size-3, "orange", queen_size, board, "No Euclid, All Drip")]
+queens = [Queen(1, 0, "red", queen_size, board, "Sophia"),
+          Queen(board_size-2, 0, "green", queen_size, board, "Ada"),
+          Queen(1, board_size-1, "blue", queen_size, board, "Emmy"),
+          Queen(board_size-2, board_size-1, "gold", queen_size, board, "Julia"),
+          Queen(0, 2, "purple", queen_size, board, "Dorothy"),
+          Queen(board_size-1, board_size-3, "orange", queen_size, board, "Hypatia")]
 group = pygame.sprite.Group()
 group.add(queens)
 group.add(ShowQuestionButton(board, "Show Question"))
