@@ -12,7 +12,7 @@ queen_figure = '♛'
 plt.rcParams['text.usetex'] = True
 
 class Queen(pygame.sprite.Sprite):
-    def __init__(self, i, j, color, size, board):
+    def __init__(self, i, j, color, size, board, name):
         super().__init__()
         self.last_i = i
         self.i = i
@@ -20,6 +20,7 @@ class Queen(pygame.sprite.Sprite):
         self.j = j
         self.align = "left"
         self.color = color
+        self.name = name
         seguisy = pygame.font.SysFont("dejavusans", size)
         self.image = seguisy.render(queen_figure, True, pygame.Color(color))
         self.board = board
@@ -99,11 +100,11 @@ class Board:
                         # delete the old rect and draw a new one
                         pygame.draw.rect(self.board, (50, 100, 50), (self.start[0]+ i*self.size, self.start[1] + (self.board_size-1-j)*self.size, self.size, self.size))
                 # add question text (topic, difficulty) inside square
-                row = self.questions.iloc[i*self.board_size+j]
+                row = self.questions.iloc[questions_jumbled[i*self.board_size+j]]
                 
                 seguisy = pygame.font.SysFont("dejavusans", int(28*scale), bold = True)
                 board_id_text = seguisy.render(str(i*self.board_size+j), True, pygame.Color('black'))
-                if not self.questions.iloc[i*self.board_size+j]['Solved']:
+                if not self.questions.iloc[questions_jumbled[i*self.board_size+j]]['Solved']:
                     topic_text = seguisy.render(row['Topic'], True, pygame.Color('black'))
                     difficulty_text = seguisy.render(row['Difficulty'], True, pygame.Color('black'))
                 else:
@@ -124,20 +125,20 @@ class Board:
             pygame.draw.line(self.board, (0, 0, 0), (self.start[0], self.start[1] + i*self.size), (self.start[0] + (self.board_size)*self.size, self.start[1] + i*self.size), 4)
             pygame.draw.line(self.board, (0, 0, 0), (self.start[0] + i*self.size, self.start[1]), (self.start[0] + i*self.size, self.start[1] + self.board_size*self.size), 4)
         # add question details (and name of current player) on right side of screen (outside of board)
-        seguisy = pygame.font.SysFont("dejavusans", int(116*scale), bold=True)
+        seguisy = pygame.font.SysFont("dejavusans", int(100*scale), bold=True)
         # center the text horizontally (use self.window_size) and add black border
         color = queens[self.current_turn].color
-        text = "Team " + color
+        text = "Team " + queens[self.current_turn].name
         x = self.start[0] + self.board_size*self.size + (self.window_size[0] - self.start[0] - self.board_size*self.size) // 2 - seguisy.render(text, True, pygame.Color(color)).get_width() // 2
         y = self.start[1] + 30*scale
         # whitewash the area before writing the text
-        pygame.draw.rect(self.board, (255, 255, 255), (x-120*scale, y-10*scale, seguisy.render(text, True, pygame.Color(color)).get_width()+240*scale, seguisy.render(text, True, pygame.Color(color)).get_height()+20*scale))
+        pygame.draw.rect(self.board, (255, 255, 255), (x-90*scale, y-10*scale, seguisy.render(text, True, pygame.Color(color)).get_width()+180*scale, seguisy.render(text, True, pygame.Color(color)).get_height()+20*scale))
         text = seguisy.render(text, True, pygame.Color(color))
         self.board.blit(text, (x, y))
 
     def show_question(self):
         # get the question details
-        row = self.questions.iloc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]
+        row = self.questions.iloc[questions_jumbled[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]]
         topic = row['Topic']
         difficulty = row['Difficulty']
         question = row['Question']
@@ -158,7 +159,7 @@ class Board:
             # image should be scaled to fit exactly the chess board
             # image = pygame.image.load("question.png")
             # image is transparent, so a white background is added
-            image = pygame.image.load(f"questions_{dim[1]}p/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
+            image = pygame.image.load(f"questions_{dim[1]}p/" + str(questions_jumbled[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]) + ".png")
             # scale image to down if its bigger than board size
             if image.get_width() > self.size*self.board_size:
                 image = pygame.transform.scale(image, (self.size*self.board_size, int(image.get_height() * self.size*self.board_size / image.get_width())))
@@ -184,7 +185,7 @@ class Board:
     
     def show_answer(self):
         # get the question details
-        row = self.questions.iloc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]
+        row = self.questions.iloc[questions_jumbled[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]]
         topic = row['Topic']
         difficulty = row['Difficulty']
         question = row['Question']
@@ -198,13 +199,13 @@ class Board:
         # webbrowser.open("answer.html")
         if self.board_state != 2:
             # render the answer to "answer.png" using matplotlib
-            self.questions.loc[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j, "Solved"] = True
+            self.questions.loc[questions_jumbled[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j], "Solved"] = True
             # fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
             # ax.axis('off')
             # ax.text(0.5, 0.5, answer, fontsize=20, wrap=True, ha='center', va='center', bbox=dict(facecolor='green', alpha=0.5))
             # fig.savefig("answer.png", bbox_inches='tight', dpi=300)
             # image should be scaled to fit exactly the chess board
-            image = pygame.image.load(f"answers_{dim[1]}p/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
+            image = pygame.image.load(f"answers_{dim[1]}p/" + str(questions_jumbled[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]) + ".png")
             # scale image  to down if its bigger than board size
             if image.get_width() > self.size*self.board_size:
                 image = pygame.transform.scale(image, (self.size*self.board_size, int(image.get_height() * self.size*self.board_size / image.get_width())))
@@ -300,9 +301,8 @@ class UndoButton(pygame.sprite.Sprite):
                     queens[self.board.current_turn].set_pos()
                     self.board.show_legal_moves(self.board.current_turn)
 
-
-
-
+# add a dict for jumbling the questions (use 23 10 8 2 16 20 21 9 1 18 5 22 17 14 24 19 13 7 0 12 3 4 6 15 11)
+questions_jumbled = [23, 10, 8, 2, 16, 20, 21, 9, 1, 18, 5, 22, 17, 14, 24, 19, 13, 7, 0, 12, 3, 4, 6, 15, 11]
 # load questions, escape with \
 questions = pd.read_csv("questions.csv", escapechar = "\\")
 questions["Solved"] = False
@@ -324,12 +324,12 @@ pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
 
 board = Board(board_size,questions)
-queens = [Queen(1, 0, "red", queen_size, board),
-          Queen(board_size-2, 0, "green", queen_size, board),
-          Queen(1, board_size-1, "blue", queen_size, board),
-          Queen(board_size-2, board_size-1, "gold", queen_size, board),
-          Queen(0, 2, "purple", queen_size, board),
-          Queen(board_size-1, board_size-3, "orange", queen_size, board)]
+queens = [Queen(1, 0, "red", queen_size, board, "Pythagor-gyatt"),
+          Queen(board_size-2, 0, "green", queen_size, board, "Einstein's Rizz"),
+          Queen(1, board_size-1, "blue", queen_size, board, "Euler No Cap"),
+          Queen(board_size-2, board_size-1, "gold", queen_size, board, "Fanum Fibonacci"),
+          Queen(0, 2, "purple", queen_size, board, "Gauss the Goat"),
+          Queen(board_size-1, board_size-3, "orange", queen_size, board, "No Euclid, All Drip")]
 group = pygame.sprite.Group()
 group.add(queens)
 group.add(ShowQuestionButton(board, "Show Question"))
