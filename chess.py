@@ -159,8 +159,11 @@ class Board:
             # image = pygame.image.load("question.png")
             # image is transparent, so a white background is added
             image = pygame.image.load(f"questions_{dim[1]}p/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
-            # scale image to 75% of its current size
-            # image = pygame.transform.scale(image, (int(image.get_width()*scale), int(image.get_height()*scale)))
+            # scale image to down if its bigger than board size
+            if image.get_width() > self.size*self.board_size:
+                image = pygame.transform.scale(image, (self.size*self.board_size, int(image.get_height() * self.size*self.board_size / image.get_width())))
+            if image.get_height() > self.size*self.board_size:
+                image = pygame.transform.scale(image, (int(image.get_width() * self.size*self.board_size / image.get_height()), self.size*self.board_size))
             # scale image to board without changing aspect ratio
             # image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
             self.board.fill((255, 255, 255), (self.start[0], self.start[1], self.size*self.board_size, self.size*self.board_size))
@@ -202,8 +205,11 @@ class Board:
             # fig.savefig("answer.png", bbox_inches='tight', dpi=300)
             # image should be scaled to fit exactly the chess board
             image = pygame.image.load(f"answers_{dim[1]}p/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
-            # scale image to 75% of its current size
-            # image = pygame.transform.scale(image, (int(image.get_width()*scale), int(image.get_height()*scale)))
+            # scale image  to down if its bigger than board size
+            if image.get_width() > self.size*self.board_size:
+                image = pygame.transform.scale(image, (self.size*self.board_size, int(image.get_height() * self.size*self.board_size / image.get_width())))
+            if image.get_height() > self.size*self.board_size:
+                image = pygame.transform.scale(image, (int(image.get_width() * self.size*self.board_size / image.get_height()), self.size*self.board_size))
             # image is transparent, so a white background is added
             # image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
             self.board.fill((255, 255, 255), (self.start[0], self.start[1], self.size*self.board_size, self.size*self.board_size))
@@ -310,9 +316,9 @@ board_size = 5
 queen_size = int(120*scale)
 pygame.init()
 # window = pygame.display.set_mode((100*board_size,100*board_size))
-# window = pygame.display.set_mode(dim)
+window = pygame.display.set_mode(dim)
 # set full screen
-window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+# window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 # window = pygame.display.set_mode((0, 0))
 pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
