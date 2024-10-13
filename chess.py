@@ -101,7 +101,7 @@ class Board:
                 # add question text (topic, difficulty) inside square
                 row = self.questions.iloc[i*self.board_size+j]
                 
-                seguisy = pygame.font.SysFont("dejavusans", 21, bold = True)
+                seguisy = pygame.font.SysFont("dejavusans", int(28*scale), bold = True)
                 board_id_text = seguisy.render(str(i*self.board_size+j), True, pygame.Color('black'))
                 if not self.questions.iloc[i*self.board_size+j]['Solved']:
                     topic_text = seguisy.render(row['Topic'], True, pygame.Color('black'))
@@ -124,14 +124,14 @@ class Board:
             pygame.draw.line(self.board, (0, 0, 0), (self.start[0], self.start[1] + i*self.size), (self.start[0] + (self.board_size)*self.size, self.start[1] + i*self.size), 4)
             pygame.draw.line(self.board, (0, 0, 0), (self.start[0] + i*self.size, self.start[1]), (self.start[0] + i*self.size, self.start[1] + self.board_size*self.size), 4)
         # add question details (and name of current player) on right side of screen (outside of board)
-        seguisy = pygame.font.SysFont("dejavusans", 84, bold=True)
+        seguisy = pygame.font.SysFont("dejavusans", int(116*scale), bold=True)
         # center the text horizontally (use self.window_size) and add black border
         color = queens[self.current_turn].color
         text = "Team " + color
         x = self.start[0] + self.board_size*self.size + (self.window_size[0] - self.start[0] - self.board_size*self.size) // 2 - seguisy.render(text, True, pygame.Color(color)).get_width() // 2
-        y = self.start[1] + 30
+        y = self.start[1] + 30*scale
         # whitewash the area before writing the text
-        pygame.draw.rect(self.board, (255, 255, 255), (x-120, y-10, seguisy.render(text, True, pygame.Color(color)).get_width()+240, seguisy.render(text, True, pygame.Color(color)).get_height()+20))
+        pygame.draw.rect(self.board, (255, 255, 255), (x-120*scale, y-10*scale, seguisy.render(text, True, pygame.Color(color)).get_width()+240*scale, seguisy.render(text, True, pygame.Color(color)).get_height()+20*scale))
         text = seguisy.render(text, True, pygame.Color(color))
         self.board.blit(text, (x, y))
 
@@ -158,9 +158,9 @@ class Board:
             # image should be scaled to fit exactly the chess board
             # image = pygame.image.load("question.png")
             # image is transparent, so a white background is added
-            image = pygame.image.load("questions/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
+            image = pygame.image.load(f"questions_{dim[1]}p/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
             # scale image to 75% of its current size
-            image = pygame.transform.scale(image, (int(image.get_width()*0.75), int(image.get_height()*0.75)))
+            # image = pygame.transform.scale(image, (int(image.get_width()*scale), int(image.get_height()*scale)))
             # scale image to board without changing aspect ratio
             # image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
             self.board.fill((255, 255, 255), (self.start[0], self.start[1], self.size*self.board_size, self.size*self.board_size))
@@ -201,9 +201,9 @@ class Board:
             # ax.text(0.5, 0.5, answer, fontsize=20, wrap=True, ha='center', va='center', bbox=dict(facecolor='green', alpha=0.5))
             # fig.savefig("answer.png", bbox_inches='tight', dpi=300)
             # image should be scaled to fit exactly the chess board
-            image = pygame.image.load("answers/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
+            image = pygame.image.load(f"answers_{dim[1]}p/" + str(queens[self.current_turn].i*self.board_size+queens[self.current_turn].j) + ".png")
             # scale image to 75% of its current size
-            image = pygame.transform.scale(image, (int(image.get_width()*0.75), int(image.get_height()*0.75)))
+            # image = pygame.transform.scale(image, (int(image.get_width()*scale), int(image.get_height()*scale)))
             # image is transparent, so a white background is added
             # image = pygame.transform.scale(image, (self.size*self.board_size, self.size*self.board_size))
             self.board.fill((255, 255, 255), (self.start[0], self.start[1], self.size*self.board_size, self.size*self.board_size))
@@ -228,7 +228,7 @@ class ShowQuestionButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 54)
+        seguisy = pygame.font.SysFont("dejavusans", int(72*scale))
         self.image = seguisy.render(text, True, pygame.Color('black'))
         self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.25))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
@@ -243,7 +243,7 @@ class ShowAnswerButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 54)
+        seguisy = pygame.font.SysFont("dejavusans", int(72*scale))
         self.image = seguisy.render(text, True, pygame.Color('black'))
         self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.45))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
@@ -262,7 +262,7 @@ class NextButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 54)
+        seguisy = pygame.font.SysFont("dejavusans", int(72*scale))
         self.image = seguisy.render(text, True, pygame.Color('black'))
         self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.65))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
@@ -279,7 +279,7 @@ class UndoButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
         super().__init__()
         self.board = board
-        seguisy = pygame.font.SysFont("dejavusans", 54)
+        seguisy = pygame.font.SysFont("dejavusans", int(72*scale))
         self.image = seguisy.render(text, True, pygame.Color('black'))
         self.rect = self.image.get_rect(center = (board.start[0] + board.board_size*board.size + (board.window_size[0] - board.start[0] - board.board_size*board.size) // 2, board.start[1] + board.board_size*board.size*0.85))
         pygame.draw.rect(board.board, (0, 0, 0), (self.rect.left-20, self.rect.top-10, self.image.get_width()+40, self.image.get_height()+20), 4)
@@ -300,16 +300,20 @@ class UndoButton(pygame.sprite.Sprite):
 # load questions, escape with \
 questions = pd.read_csv("questions.csv", escapechar = "\\")
 questions["Solved"] = False
+# dim = (2560,1440)
+dim = (1920,1080)
+scale = dim[1]/1440
 # pygame setup
 num_queens = 6
 board_size = 5
 # queen_size = 80
-queen_size = 100
+queen_size = int(120*scale)
 pygame.init()
 # window = pygame.display.set_mode((100*board_size,100*board_size))
-window = pygame.display.set_mode((2560,1440))
+# window = pygame.display.set_mode(dim)
 # set full screen
 window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+# window = pygame.display.set_mode((0, 0))
 pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
 
