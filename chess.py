@@ -2,14 +2,12 @@
 # queens take turns choosing a new position to move to (by clicking)
 import pygame
 import pandas as pd
-# from jinja2 import Environment, FileSystemLoader, select_autoescape
 import matplotlib.pyplot as plt
 queen_figure = '♛'
-# env = Environment(
-#     loader=FileSystemLoader('.'),
-#     autoescape=select_autoescape()
-# )
 plt.rcParams['text.usetex'] = True
+# change this to change the resolution
+# dim = (2560,1440)
+dim = (1920,1080)
 
 class Queen(pygame.sprite.Sprite):
     def __init__(self, i, j, color, size, board, name):
@@ -82,7 +80,6 @@ class Board:
         self.board_state = 0 # 0: board visible, 1: question visible, 2: answer visible
 
     def reset_board(self):
-        # ts, w, h, c1, c2 = 50, *window.get_size(), (128, 128, 128), (64, 64, 64)
         for y in range(self.board_size):
             for x in range(self.board_size):
                 color = (192, 192, 164) if (x+y) % 2 == 0 else (96, 64, 32)
@@ -137,28 +134,7 @@ class Board:
         self.board.blit(text, (x, y))
 
     def show_question(self):
-        # get the question details
-        row = self.questions.iloc[questions_jumbled[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]]
-        topic = row['Topic']
-        difficulty = row['Difficulty']
-        question = row['Question']
-        answer = row['Answer']
-        # # create the html page
-        # # open the html page in a new browser window
-        # template = env.get_template("question_template.html")
-        # html = template.render(topic=topic, difficulty=difficulty, question=question, answer=answer)
-        # with open("question.html", "w") as f:
-        #     f.write(html)
-        # webbrowser.open("question.html")
         if self.board_state != 1:
-            # render the question to "question.png" using matplotlib
-            # fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
-            # ax.axis('off')
-            # ax.text(0.5, 0.5, question, fontsize=20, wrap=True, ha='center', va='center', bbox=dict(facecolor='red', alpha=0.5))
-            # fig.savefig("question.png", bbox_inches='tight', dpi=300)
-            # image should be scaled to fit exactly the chess board
-            # image = pygame.image.load("question.png")
-            # image is transparent, so a white background is added
             image = pygame.image.load(f"questions_{dim[1]}p/" + str(questions_jumbled[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]) + ".png")
             # scale image to down if its bigger than board size
             if image.get_width() > self.size*self.board_size:
@@ -184,27 +160,8 @@ class Board:
             self.board_state = 0
     
     def show_answer(self):
-        # get the question details
-        row = self.questions.iloc[questions_jumbled[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]]
-        topic = row['Topic']
-        difficulty = row['Difficulty']
-        question = row['Question']
-        answer = row['Answer']
-        # # create the html page
-        # # open the html page in a new browser window
-        # template = env.get_template("answer_template.html")
-        # html = template.render(topic=topic, difficulty=difficulty, question=question, answer=answer)
-        # with open("answer.html", "w") as f:
-        #     f.write(html)
-        # webbrowser.open("answer.html")
         if self.board_state != 2:
-            # render the answer to "answer.png" using matplotlib
             self.questions.loc[questions_jumbled[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j], "Solved"] = True
-            # fig, ax = plt.subplots(figsize=(self.board_size, self.board_size))
-            # ax.axis('off')
-            # ax.text(0.5, 0.5, answer, fontsize=20, wrap=True, ha='center', va='center', bbox=dict(facecolor='green', alpha=0.5))
-            # fig.savefig("answer.png", bbox_inches='tight', dpi=300)
-            # image should be scaled to fit exactly the chess board
             image = pygame.image.load(f"answers_{dim[1]}p/" + str(questions_jumbled[queens[self.current_turn].i*self.board_size+queens[self.current_turn].j]) + ".png")
             # scale image  to down if its bigger than board size
             if image.get_width() > self.size*self.board_size:
@@ -260,10 +217,6 @@ class ShowAnswerButton(pygame.sprite.Sprite):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos) and self.board.move_chosen:
                     self.board.show_answer()
-                    # self.board.move_chosen = False
-                    # self.board.questions.loc[queens[self.board.current_turn].i*self.board.board_size+queens[self.board.current_turn].j, "Solved"] = True
-                    # self.board.current_turn = (self.board.current_turn + 1) % num_queens
-                    # self.board.show_legal_moves(self.board.current_turn)
 
 class NextButton(pygame.sprite.Sprite):
     def __init__(self, board, text):
@@ -301,35 +254,23 @@ class UndoButton(pygame.sprite.Sprite):
                     queens[self.board.current_turn].set_pos()
                     self.board.show_legal_moves(self.board.current_turn)
 
-# add a dict for jumbling the questions (use 23 10 8 2 16 20 21 9 1 18 5 22 17 14 24 19 13 7 0 12 3 4 6 15 11)
+# add a dict for jumbling the questions
 questions_jumbled = [23, 10, 8, 2, 16, 20, 21, 9, 1, 18, 5, 22, 17, 14, 24, 19, 13, 7, 0, 12, 3, 4, 6, 15, 11]
 # load questions, escape with \
 questions = pd.read_csv("questions.csv", escapechar = "\\")
 questions["Solved"] = False
-# dim = (2560,1440)
-dim = (1920,1080)
 scale = dim[1]/1440
 # pygame setup
 num_queens = 6
 board_size = 5
-# queen_size = 80
 queen_size = int(120*scale)
 pygame.init()
-# window = pygame.display.set_mode((100*board_size,100*board_size))
 # window = pygame.display.set_mode(dim)
-# set full screen
 window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-# window = pygame.display.set_mode((0, 0))
 pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
 
 board = Board(board_size,questions)
-# queens = [Queen(1, 0, "red", queen_size, board, "Pythagor-gyatt"),
-#           Queen(board_size-2, 0, "green", queen_size, board, "Einstein's Rizz"),
-#           Queen(1, board_size-1, "blue", queen_size, board, "Euler No Cap"),
-#           Queen(board_size-2, board_size-1, "gold", queen_size, board, "Fanum Fibonacci"),
-#           Queen(0, 2, "purple", queen_size, board, "Gauss the Goat"),
-#           Queen(board_size-1, board_size-3, "orange", queen_size, board, "No Euclid, All Drip")]
 queens = [Queen(1, 0, "red", queen_size, board, "Sophia"),
           Queen(board_size-2, 0, "green", queen_size, board, "Ada"),
           Queen(1, board_size-1, "blue", queen_size, board, "Emmy"),
